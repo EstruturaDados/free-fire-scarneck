@@ -33,7 +33,62 @@ int main() {
 
     // A estrutura switch trata cada opção chamando a função correspondente.
     // A ordenação e busca binária exigem que os dados estejam bem organizados.
+    Item mochila[MAX_BAG];
+    int totalItens = 0;
+    int opcao;
 
+    do {
+        exibirMenu(totalItens);
+        scanf("%d", &opcao);
+        getchar();
+
+        switch (opcao) {
+            case 1:
+                inserirItem(mochila, &totalItens);
+                listarItens(mochila, totalItens); // mostra após ação
+                break;
+
+            case 2:
+                removerItem(mochila, &totalItens);
+                listarItens(mochila, totalItens);
+                break;
+
+            case 3:
+                listarItens(mochila, totalItens);
+                break;
+
+            case 4: {
+                char nomeBusca[30];
+
+                printf("\n--- Buscar Item ---\n");
+                printf("Digite o nome: ");
+                fgets(nomeBusca, TAM_STR, stdin);
+                nomeBusca[strcspn(nomeBusca, "\n")] = '\0';
+
+                int pos = buscarItem(mochila, totalItens, nomeBusca);
+
+                if (pos == -1) {
+                    printf("\nItem nao encontrado!\n");
+                } else {
+                    printf("\nItem encontrado!\n");
+                    printf("Nome: %s\n", mochila[pos].nome);
+                    printf("Tipo: %s\n", mochila[pos].tipo);
+                    printf("Quantidade: %d\n", mochila[pos].quantidade);
+                }
+                break;
+            }
+
+            case 0:
+                printf("\nEncerrando sistema...\n");
+                break;
+
+            default:
+                printf("\nOpcao invalida! Tente novamente.\n");
+        }
+
+    } while (opcao != 0);
+
+    return 0;
     return 0;
 }
 
