@@ -7,6 +7,20 @@
 // Nível: Mestre
 // Este programa simula o gerenciamento avançado de uma mochila com componentes coletados durante a fuga de uma ilha.
 // Ele introduz ordenação com critérios e busca binária para otimizar a gestão dos recursos.
+#define TAM_STR 50
+#define MAX_BAG 10
+
+typedef struct{
+    char nome[30];
+    char tipo[20];
+    int quantidade;
+} Item;
+
+void exibirMenu(int totalItens);
+void inserirItem(Item mochila[], int *total);
+void listarItens(Item mochila[], int total);
+int buscarItem(Item mochila[], int total, char nomeBusca[]);
+void removerItem(Item mochila[], int *total);
 
 int main() {
     // Menu principal com opções:
