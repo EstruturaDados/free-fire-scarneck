@@ -11,8 +11,8 @@
 #define MAX_BAG 10
 
 typedef struct{
-    char nome[30];
-    char tipo[20];
+    char nome[TAM_STR];
+    char tipo[TAM_STR];
     int quantidade;
 } Item;
 
@@ -58,7 +58,7 @@ int main() {
                 break;
 
             case 4: {
-                char nomeBusca[30];
+                char nomeBusca[TAM_STR];
 
                 printf("\n--- Buscar Item ---\n");
                 printf("Digite o nome: ");
@@ -88,7 +88,6 @@ int main() {
 
     } while (opcao != 0);
 
-    return 0;
     return 0;
 }
 
