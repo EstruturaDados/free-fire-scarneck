@@ -37,6 +37,96 @@ int main() {
     return 0;
 }
 
+void inserirItem(Item mochila[], int *total) {
+    if (*total >= MAX_BAG) {
+        printf("Mochila cheia!\n");
+        return;
+    }
+
+    printf("\n--- Adicionar Item ---\n");
+
+    printf("Nome: ");
+    fgets(mochila[*total].nome, TAM_STR, stdin);
+    mochila[*total].nome[strcspn(mochila[*total].nome, "\n")] = '\0';
+
+    printf("Tipo: ");
+    fgets(mochila[*total].tipo, TAM_STR, stdin);
+    mochila[*total].tipo[strcspn(mochila[*total].tipo, "\n")] = '\0';
+
+    printf("Quantidade: ");
+    scanf("%d", &mochila[*total].quantidade);
+    getchar();
+
+    (*total)++;
+
+    printf("Item adicionado com sucesso!\n");
+}
+
+void listarItens(Item mochila[], int total) {
+    printf("\n--- Itens na Mochila ---\n");
+
+    if (total == 0) {
+        printf("Mochila vazia!\n");
+        return;
+    }
+
+    for (int i = 0; i < total; i++) {
+        printf("\nItem %d\n", i + 1);
+        printf("Nome: %s\n", mochila[i].nome);
+        printf("Tipo: %s\n", mochila[i].tipo);
+        printf("Quantidade: %d\n", mochila[i].quantidade);
+    }
+    printf("\nPressione ENTER para continuar...\n");
+    getchar();
+}
+
+int buscarItem(Item mochila[], int total, char nomeBusca[]) {
+    for (int i = 0; i < total; i++) {
+        if (strcmp(mochila[i].nome, nomeBusca) == 0) {
+            return i;
+        }
+    }
+    return -1;
+}
+
+void removerItem(Item mochila[], int *total) {
+    char nomeBusca[TAM_STR];
+
+    printf("\nDigite o nome do item a remover: ");
+    fgets(nomeBusca, TAM_STR, stdin);
+    nomeBusca[strcspn(nomeBusca, "\n")] = '\0';
+
+    int pos = buscarItem(mochila, *total, nomeBusca);
+
+    if (pos == -1) {
+        printf("Item nao encontrado!\n");
+        return;
+    }
+
+    // desloca os itens
+    for (int i = pos; i < *total - 1; i++) {
+        mochila[i] = mochila[i + 1];
+    }
+
+    (*total)--;
+
+    printf("Item removido com sucesso!\n");
+}
+
+void exibirMenu(int totalItens) {
+    printf("\n=================================\n");
+    printf("   MOCHILA DE SOBREVIVENCIA\n");
+    printf("=================================\n");
+    printf("Itens: %d/%d\n\n", totalItens,MAX_BAG);
+
+    printf("1 - Adicionar item\n");
+    printf("2 - Remover item\n");
+    printf("3 - Listar itens\n");
+    printf("4 - Buscar item\n");
+    printf("0 - Sair\n");
+
+    printf("\nEscolha uma opcao: ");
+}
 // Struct Item:
 // Representa um componente com nome, tipo, quantidade e prioridade (1 a 5).
 // A prioridade indica a importância do item na montagem do plano de fuga.
