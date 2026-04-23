@@ -1,228 +1,187 @@
 #include <stdio.h>
-#include <string.h>
 #include <stdlib.h>
-#include <stdbool.h>
+#include <string.h>
+#include <time.h>
 
-// Código da Ilha – Edição Free Fire
-// Nível: Mestre
-// Este programa simula o gerenciamento avançado de uma mochila com componentes coletados durante a fuga de uma ilha.
-// Ele introduz ordenação com critérios e busca binária para otimizar a gestão dos recursos.
-#define TAM_STR 50
-#define MAX_BAG 10
+#define MAX 20
 
-typedef struct{
-    char nome[TAM_STR];
-    char tipo[TAM_STR];
-    int quantidade;
-} Item;
+// Struct do componente
+typedef struct {
+    char nome[30];
+    char tipo[20];
+    int prioridade;
+} Componente;
 
-void exibirMenu(int totalItens);
-void inserirItem(Item mochila[], int *total);
-void listarItens(Item mochila[], int total);
-int buscarItem(Item mochila[], int total, char nomeBusca[]);
-void removerItem(Item mochila[], int *total);
+// Variável global para contar comparações
+int comparacoes = 0;
 
-int main() {
-    // Menu principal com opções:
-    // 1. Adicionar um item
-    // 2. Remover um item
-    // 3. Listar todos os itens
-    // 4. Ordenar os itens por critério (nome, tipo, prioridade)
-    // 5. Realizar busca binária por nome
-    // 0. Sair
+// Função para remover '\n' do fgets
+void limparNewline(char *str) {
+    str[strcspn(str, "\n")] = '\0';
+}
 
-    // A estrutura switch trata cada opção chamando a função correspondente.
-    // A ordenação e busca binária exigem que os dados estejam bem organizados.
-    Item mochila[MAX_BAG];
-    int totalItens = 0;
-    int opcao;
+// Mostrar componentes
+void mostrarComponentes(Componente c[], int n) {
+    printf("\n--- LISTA DE COMPONENTES ---\n");
+    for(int i = 0; i < n; i++) {
+        printf("%d. Nome: %s | Tipo: %s | Prioridade: %d\n",
+               i+1, c[i].nome, c[i].tipo, c[i].prioridade);
+    }
+}
 
-    do {
-        exibirMenu(totalItens);
-        scanf("%d", &opcao);
-        getchar();
-
-        switch (opcao) {
-            case 1:
-                inserirItem(mochila, &totalItens);
-                listarItens(mochila, totalItens); // mostra após ação
-                break;
-
-            case 2:
-                removerItem(mochila, &totalItens);
-                listarItens(mochila, totalItens);
-                break;
-
-            case 3:
-                listarItens(mochila, totalItens);
-                break;
-
-            case 4: {
-                char nomeBusca[TAM_STR];
-
-                printf("\n--- Buscar Item ---\n");
-                printf("Digite o nome: ");
-                fgets(nomeBusca, TAM_STR, stdin);
-                nomeBusca[strcspn(nomeBusca, "\n")] = '\0';
-
-                int pos = buscarItem(mochila, totalItens, nomeBusca);
-
-                if (pos == -1) {
-                    printf("\nItem nao encontrado!\n");
-                } else {
-                    printf("\nItem encontrado!\n");
-                    printf("Nome: %s\n", mochila[pos].nome);
-                    printf("Tipo: %s\n", mochila[pos].tipo);
-                    printf("Quantidade: %d\n", mochila[pos].quantidade);
-                }
-                break;
+// Bubble Sort por nome
+void bubbleSortNome(Componente c[], int n) {
+    int comparacoes = 0;
+    for(int i = 0; i < n-1; i++) {
+        for(int j = 0; j < n-i-1; j++) {
+            comparacoes++;
+            if(strcmp(c[j].nome, c[j+1].nome) > 0) {
+                Componente temp = c[j];
+                c[j] = c[j+1];
+                c[j+1] = temp;
             }
-
-            case 0:
-                printf("\nEncerrando sistema...\n");
-                break;
-
-            default:
-                printf("\nOpcao invalida! Tente novamente.\n");
         }
-
-    } while (opcao != 0);
-
-    return 0;
+    }
 }
 
-void inserirItem(Item mochila[], int *total) {
-    if (*total >= MAX_BAG) {
-        printf("Mochila cheia!\n");
-        return;
-    }
+// Insertion Sort por tipo
+void insertionSortTipo(Componente c[], int n) {
+    comparacoes = 0;
+    for(int i = 1; i < n; i++) {
+        Componente chave = c[i];
+        int j = i - 1;
 
-    printf("\n--- Adicionar Item ---\n");
-
-    printf("Nome: ");
-    fgets(mochila[*total].nome, TAM_STR, stdin);
-    mochila[*total].nome[strcspn(mochila[*total].nome, "\n")] = '\0';
-
-    printf("Tipo: ");
-    fgets(mochila[*total].tipo, TAM_STR, stdin);
-    mochila[*total].tipo[strcspn(mochila[*total].tipo, "\n")] = '\0';
-
-    printf("Quantidade: ");
-    scanf("%d", &mochila[*total].quantidade);
-    getchar();
-
-    (*total)++;
-
-    printf("Item adicionado com sucesso!\n");
-}
-
-void listarItens(Item mochila[], int total) {
-    printf("\n--- Itens na Mochila ---\n");
-
-    if (total == 0) {
-        printf("Mochila vazia!\n");
-        return;
-    }
-
-    for (int i = 0; i < total; i++) {
-        printf("\nItem %d\n", i + 1);
-        printf("Nome: %s\n", mochila[i].nome);
-        printf("Tipo: %s\n", mochila[i].tipo);
-        printf("Quantidade: %d\n", mochila[i].quantidade);
-    }
-    printf("\nPressione ENTER para continuar...\n");
-    getchar();
-}
-
-int buscarItem(Item mochila[], int total, char nomeBusca[]) {
-    for (int i = 0; i < total; i++) {
-        if (strcmp(mochila[i].nome, nomeBusca) == 0) {
-            return i;
+        while(j >= 0 && strcmp(c[j].tipo, chave.tipo) > 0) {
+            comparacoes++;
+            c[j+1] = c[j];
+            j--;
         }
+        comparacoes++;
+        c[j+1] = chave;
+    }
+}
+
+// Selection Sort por prioridade
+void selectionSortPrioridade(Componente c[], int n) {
+    comparacoes = 0;
+    for(int i = 0; i < n-1; i++) {
+        int min = i;
+        for(int j = i+1; j < n; j++) {
+            comparacoes++;
+            if(c[j].prioridade < c[min].prioridade) {
+                min = j;
+            }
+        }
+        Componente temp = c[i];
+        c[i] = c[min];
+        c[min] = temp;
+    }
+}
+
+// Busca binária por nome
+int buscaBinariaPorNome(Componente c[], int n, char chave[]) {
+    int inicio = 0, fim = n - 1;
+
+    while(inicio <= fim) {
+        int meio = (inicio + fim) / 2;
+        int cmp = strcmp(c[meio].nome, chave);
+
+        if(cmp == 0)
+            return meio;
+        else if(cmp < 0)
+            inicio = meio + 1;
+        else
+            fim = meio - 1;
     }
     return -1;
 }
 
-void removerItem(Item mochila[], int *total) {
-    char nomeBusca[TAM_STR];
+// Medir tempo de execução
+void medirTempo(void (*algoritmo)(Componente[], int), Componente c[], int n) {
+    clock_t inicio, fim;
 
-    printf("\nDigite o nome do item a remover: ");
-    fgets(nomeBusca, TAM_STR, stdin);
-    nomeBusca[strcspn(nomeBusca, "\n")] = '\0';
+    inicio = clock();
+    algoritmo(c, n);
+    fim = clock();
 
-    int pos = buscarItem(mochila, *total, nomeBusca);
+    double tempo = ((double)(fim - inicio)) / CLOCKS_PER_SEC;
 
-    if (pos == -1) {
-        printf("Item nao encontrado!\n");
-        return;
+    printf("\nComparações: %d", comparacoes);
+    printf("\nTempo de execução: %f segundos\n", tempo);
+} // --> ChatGPT
+
+// Função principal
+int main() {
+    Componente componentes[MAX];
+    int n;
+
+    printf("Quantos componentes deseja cadastrar (max 20)? ");
+    scanf("%d", &n);
+    getchar();
+
+    // Entrada de dados
+    for(int i = 0; i < n; i++) {
+        printf("\nComponente %d\n", i+1);
+
+        printf("Nome: ");
+        fgets(componentes[i].nome, 30, stdin);
+        limparNewline(componentes[i].nome);
+
+        printf("Tipo: ");
+        fgets(componentes[i].tipo, 20, stdin);
+        limparNewline(componentes[i].tipo);
+
+        printf("Prioridade (1-10): ");
+        scanf("%d", &componentes[i].prioridade);
+        getchar();
     }
 
-    // desloca os itens
-    for (int i = pos; i < *total - 1; i++) {
-        mochila[i] = mochila[i + 1];
-    }
+    int opcao;
+    char chave[30];
 
-    (*total)--;
+    do {
+        printf("\n--- MENU ---\n");
+        printf("1 - Ordenar por Nome (Bubble Sort)\n");
+        printf("2 - Ordenar por Tipo (Insertion Sort)\n");
+        printf("3 - Ordenar por Prioridade (Selection Sort)\n");
+        printf("4 - Buscar componente-chave (Busca Binária)\n");
+        printf("0 - Sair\n");
+        printf("Escolha: ");
+        scanf("%d", &opcao);
+        getchar();
 
-    printf("Item removido com sucesso!\n");
+        switch(opcao) {
+            case 1:
+                medirTempo(bubbleSortNome, componentes, n);
+                mostrarComponentes(componentes, n);
+                break;
+
+            case 2:
+                medirTempo(insertionSortTipo, componentes, n);
+                mostrarComponentes(componentes, n);
+                break;
+
+            case 3:
+                medirTempo(selectionSortPrioridade, componentes, n);
+                mostrarComponentes(componentes, n);
+                break;
+
+            case 4:
+                printf("Digite o nome do componente-chave: ");
+                fgets(chave, 30, stdin);
+                limparNewline(chave);
+
+                int pos = buscaBinariaPorNome(componentes, n, chave);
+
+                if(pos != -1)
+                    printf("Componente encontrado na posição %d!\n", pos+1);
+                else
+                    printf("Componente NÃO encontrado.\n");
+
+                break;
+        }
+
+    } while(opcao != 0);
+
+    return 0;
 }
-
-void exibirMenu(int totalItens) {
-    printf("\n=================================\n");
-    printf("   MOCHILA DE SOBREVIVENCIA\n");
-    printf("=================================\n");
-    printf("Itens: %d/%d\n\n", totalItens,MAX_BAG);
-
-    printf("1 - Adicionar item\n");
-    printf("2 - Remover item\n");
-    printf("3 - Listar itens\n");
-    printf("4 - Buscar item\n");
-    printf("0 - Sair\n");
-
-    printf("\nEscolha uma opcao: ");
-}
-// Struct Item:
-// Representa um componente com nome, tipo, quantidade e prioridade (1 a 5).
-// A prioridade indica a importância do item na montagem do plano de fuga.
-
-// Enum CriterioOrdenacao:
-// Define os critérios possíveis para a ordenação dos itens (nome, tipo ou prioridade).
-
-// Vetor mochila:
-// Armazena até 10 itens coletados.
-// Variáveis de controle: numItens (quantidade atual), comparacoes (análise de desempenho), ordenadaPorNome (para controle da busca binária).
-
-// limparTela():
-// Simula a limpeza da tela imprimindo várias linhas em branco.
-
-// exibirMenu():
-// Apresenta o menu principal ao jogador, com destaque para status da ordenação.
-
-// inserirItem():
-// Adiciona um novo componente à mochila se houver espaço.
-// Solicita nome, tipo, quantidade e prioridade.
-// Após inserir, marca a mochila como "não ordenada por nome".
-
-// removerItem():
-// Permite remover um componente da mochila pelo nome.
-// Se encontrado, reorganiza o vetor para preencher a lacuna.
-
-// listarItens():
-// Exibe uma tabela formatada com todos os componentes presentes na mochila.
-
-// menuDeOrdenacao():
-// Permite ao jogador escolher como deseja ordenar os itens.
-// Utiliza a função insertionSort() com o critério selecionado.
-// Exibe a quantidade de comparações feitas (análise de desempenho).
-
-// insertionSort():
-// Implementação do algoritmo de ordenação por inserção.
-// Funciona com diferentes critérios de ordenação:
-// - Por nome (ordem alfabética)
-// - Por tipo (ordem alfabética)
-// - Por prioridade (da mais alta para a mais baixa)
-
-// buscaBinariaPorNome():
-// Realiza busca binária por nome, desde que a mochila esteja ordenada por nome.
-// Se encontrar, exibe os dados do item buscado.
-// Caso contrário, informa que não encontrou o item.
